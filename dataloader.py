@@ -20,7 +20,8 @@ from params import Hpyerparams as hp
 class myDataset(data.Dataset):
     def __init__(self, rootpath):
         self.datapath = rootpath
-        self.maxlen = 0
+        self.maxlen = hp.max_len
+        # self.imgshape_set = set()
         classDir = os.listdir(self.datapath)
         # print(classDir)
         self.splitsList = []
@@ -34,8 +35,17 @@ class myDataset(data.Dataset):
                 splitList = [classPath/allDir/imgPath for imgPath in imgPaths]
                 length = len(splitList)
                 if length > self.maxlen:
-                    self.maxlen = length
-                self.splitsList.append((splitList, className, i))
+                    for k in range(hp.max_splits):
+                        # 最多收集 30 个序列，每个序列和相邻序列间隔 7 帧
+                        start = hp.sample_len*k
+                        end = start + self.maxlen
+                        if end > length: end = length
+                        new_splitList = splitList[start:end]
+                        # print(len(new_splitList))
+                        self.splitsList.append((new_splitList, className, i))
+                        if end == length or start + self.maxlen > length:
+                            break
+                # self.splitsList.append((splitList, className, i))
         # for (lists, name, i) in self.splitsList:
         #     print("=> {}|{}".format(name, i))
         #     print(lists)
@@ -49,7 +59,9 @@ class myDataset(data.Dataset):
             img = np.transpose(io.imread(path), (2, 0, 1)).astype(np.float32)
             imgs.append(img)
         imgs = np.stack(imgs, axis=0)
-        print(imgs.shape)
+        img_shape = imgs.shape[-2:]
+        # self.imgshape_set.add(img_shape)
+        # print(imgs.shape)
         imgs, mask = on_mask(imgs, self.maxlen)
         return imgs, mask, id
 
@@ -79,7 +91,16 @@ if __name__ == '__main__':
     #             print(classPath/allDir/imgPath)
     #         print('-'*30)
     mydataset = myDataset(hp.data_path)
+    print("=> maxlen {}".format(mydataset.maxlen))
     data_loader = data.DataLoader(mydataset)
+    shapes = set()
     for imgs, mask, id in data_loader:
         print("=>", imgs.shape, mask.shape, id)
+        imgshape = imgs.shape[-2:]
+        shapes.add(imgshape)
+        # a = input("check for next...")
+    print('-'*30)
+    print("=> shapes {}".format(len(shapes)))
+    for shape in shapes:
+        print(shape)
 # inputs, classes = next(iter(train_loader))
