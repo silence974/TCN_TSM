@@ -10,7 +10,7 @@ import torchvision.models as models
 class ResnetEncoder(nn.Module):
     """Pytorch module for a resnet encoder
     """
-    def __init__(self, num_layers, pretrained):
+    def __init__(self, TSM, num_layers, pretrained=True):
         super(ResnetEncoder, self).__init__()
 
         resnets = {18: models.resnet18,
@@ -18,7 +18,7 @@ class ResnetEncoder(nn.Module):
                    50: models.resnet50,
                    101: models.resnet101,
                    152: models.resnet152}
-
+        self.tsm = TSM
         if num_layers not in resnets:
             raise ValueError("{} is not a valid number of resnet layers".format(num_layers))
         self.encoder = resnets[num_layers](pretrained)
@@ -30,10 +30,10 @@ class ResnetEncoder(nn.Module):
         x = self.encoder.relu(x)
         x = self.encoder.maxpool(x)
 
-        x = self.encoder.layer1(x)
-        x = self.encoder.layer2(x)
-        x = self.encoder.layer3(x)
-        x = self.encoder.layer4(x)
+        x = self.encoder.layer1(self.tsm(x))
+        x = self.encoder.layer2(self.tsm(x))
+        x = self.encoder.layer3(self.tsm(x))
+        x = self.encoder.layer4(self.tsm(x))
 
         x = self.encoder.avgpool(x)
         out = torch.flatten(x, 1)

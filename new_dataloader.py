@@ -10,8 +10,6 @@ from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms, datasets
 from params import Hpyerparams as hp
 
-
-
 def split_dir(rootpath):
     classDir = os.listdir(rootpath)
     split_dic = {}
@@ -39,16 +37,23 @@ class myDataset(data.Dataset):
                 imgPaths = os.listdir(classPath / allDir)
                 splitList = [classPath / allDir / imgPath for imgPath in imgPaths]
                 length = len(splitList)
-                if length > self.maxlen:
-                    for k in range(hp.max_splits):
-                        # 最多收集 30 个序列，每个序列和相邻序列间隔 7 帧
-                        start = hp.sample_len * k
-                        end = start + self.maxlen
-                        if end > length: end = length
-                        new_splitList = splitList[start:end]
-                        self.splitsList.append((new_splitList, className, i))
-                        if end == length or start + self.maxlen > length:
-                            break
+                if length < self.maxlen:
+                    continue
+                space = length // self.maxlen
+                new_splitList = []
+                for k in range(self.maxlen):
+                    new_splitList.append(splitList[k * space])
+                self.splitsList.append((new_splitList, className, i))
+                # if length > self.maxlen:
+                #     for k in range(hp.max_splits):
+                #         # 最多收集 30 个序列，每个序列和相邻序列间隔 7 帧
+                #         start = hp.sample_len * k
+                #         end = start + self.maxlen
+                #         if end > length: end = length
+                #         new_splitList = splitList[start:end]
+                #         self.splitsList.append((new_splitList, className, i))
+                #         if end == length or start + self.maxlen > length:
+                #             break
 
     def __len__(self):
         return len(self.splitsList)

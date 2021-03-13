@@ -3,9 +3,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 class TemporalShift(nn.Module):
-    def __init__(self, net, n_segment=3, n_div=8, inplace=False):
+    def __init__(self, n_segment=3, n_div=8, inplace=False):
         super(TemporalShift, self).__init__()
-        self.net = net
         self.n_segment = n_segment
         self.fold_div = n_div
         self.inplace = inplace
@@ -34,7 +33,7 @@ class TemporalShift(nn.Module):
         return out.view(nt, c, h, w)
 
 if __name__ == '__main__':
-    tsm1 = TemporalShift(nn.Sequential(), n_segment=3, n_div=3, inplace=False)
+    tsm1 = TemporalShift(n_segment=3, n_div=3, inplace=False)
 
     with torch.no_grad():
         x = torch.rand(1*3, 3, 1, 1)

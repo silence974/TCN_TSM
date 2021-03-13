@@ -4,6 +4,7 @@ import torch.nn.functional as F
 from torch.nn.utils import weight_norm
 from torchsummary import summary
 from Model.BaseModules import *
+from params import Hpyerparams as hp
 import torchsnooper
 
 class ED_TCN_Model(nn.Module):
@@ -38,9 +39,5 @@ class ED_TCN_Model(nn.Module):
         return out
 
 if __name__ == '__main__':
-    n_feat = 18
-    n_nodes = [64, 96]
-    n_classes = 18
-    conv = 25
-    model = ED_TCN_Model(n_feat, n_nodes, n_classes, conv)
-    print(summary(model, (18, 552)))
+    model = ED_TCN_Model(hp.n_feat, hp.n_nodes, hp.n_class, hp.n_conv)
+    print(summary(model, (256, 128)))

@@ -33,10 +33,12 @@ class TermLogger(object):
     def reset_train_bar(self):
         self.train_bar = progressbar.ProgressBar(
             maxval=self.train_size, fd=self.train_bar_writer)
+        self.train_bar.start()
 
     def reset_valid_bar(self):
         self.valid_bar = progressbar.ProgressBar(
             maxval=self.valid_size, fd=self.valid_bar_writer)
+        self.valid_bar.start()
 
 
 class Writer(object):
